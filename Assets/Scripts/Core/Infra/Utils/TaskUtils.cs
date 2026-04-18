@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Core.Infra.Log;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 public static class TaskUtils
 {
@@ -18,7 +17,7 @@ public static class TaskUtils
         }
         catch (Exception e)
         {
-            throw e;
+            Log.Exception(e);
         }
     }
 }
