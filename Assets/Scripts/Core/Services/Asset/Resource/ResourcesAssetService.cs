@@ -3,7 +3,7 @@ using Core.Infra.Service;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Core.Services.Asset
+namespace Core.Services.Asset.Resource
 {
     public class ResourcesAssetService : IAssetService
     {
@@ -42,13 +42,14 @@ namespace Core.Services.Asset
             return UniTask.FromResult((T) asset);
         }
 
-        public void Destroy(Object asset)
+        public void Destroy<T>(IAsset<T> asset) where T : Object
         {
-            Object.Destroy(asset);
+            Object.Destroy(asset.Instance);
         }
 
-        public void Unload(GameObject asset)
+        public void Unload<T>(IAsset<T> asset) where T : Object
         {
+            Resources.UnloadAsset(asset.Instance);
         }
     }
 }

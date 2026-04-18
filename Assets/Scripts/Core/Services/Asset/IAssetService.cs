@@ -8,7 +8,7 @@ namespace Core.Services.Asset
     {
         UniTask<T> Instantiate<T>(string id) where T : Object; 
         UniTask<T> Load<T>(string id) where T : Object;
-        void Destroy(Object asset);
-        void Unload(GameObject asset);
+        void Destroy<T>(IAsset<T> asset) where T : Object;
+        void Unload<T>(IAsset<T> asset) where T : Object;
     }
 }
