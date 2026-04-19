@@ -18,6 +18,7 @@ namespace Core.Services.Asset.Addressables
             _handle = handle;
             Count = count;
             UnloadAtZero = unloadAtZero;
+            Asset = handle.Result;
         }
         
         public void AddInstance()
@@ -41,5 +42,7 @@ namespace Core.Services.Asset.Addressables
             
             UnityEngine.AddressableAssets.Addressables.Release(_handle);
         }
+
+        public Object Asset { get; }
     }
 }

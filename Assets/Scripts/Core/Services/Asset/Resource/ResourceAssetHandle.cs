@@ -1,5 +1,4 @@
-﻿using Core.Services.Asset.Addressables;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Core.Services.Asset.Resource
 {
@@ -9,11 +8,9 @@ namespace Core.Services.Asset.Resource
         public bool UnloadAtZero { get; set; }
         public bool UnloadRequested => UnloadAtZero && Count == 0;
         
-        private readonly Object _asset;
-
         public ResourceAssetHandle(Object asset, int count, bool unloadAtZero = false)
         {
-            _asset = asset;
+            Asset = asset;
             Count = count;
             UnloadAtZero = unloadAtZero;
         }
@@ -31,7 +28,9 @@ namespace Core.Services.Asset.Resource
 
         public void Release()
         {
-            Resources.UnloadAsset(_asset);
+            Resources.UnloadAsset(Asset);
         }
+
+        public Object Asset { get; }
     }
 }

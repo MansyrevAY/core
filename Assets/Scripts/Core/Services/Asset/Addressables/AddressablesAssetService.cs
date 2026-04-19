@@ -1,62 +1,83 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Core.Infra.Log;
-using Core.Infra.Service;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using IServiceProvider = Core.Infra.Service.IServiceProvider;
+using Object = UnityEngine.Object;
 
 namespace Core.Services.Asset.Addressables
 {
     public class AddressablesAssetService : IAssetService
     {
-        private readonly Dictionary<string, IAssetHandle> _loadedAssets = new();
+        private readonly Dictionary<string, IAssetHandle> _cachedHandles = new();
         
         public void Init(IServiceProvider provider)
         {
             
         }
 
-        public async UniTask<T> Instantiate<T>(string id) where T : Object
+        public async UniTask<GameObject> Instantiate(string id)
         {
-            var handle = UnityEngine.AddressableAssets.Addressables.InstantiateAsync(id, Vector3.zero, Quaternion.identity);
-            await handle.Task;
+            var gameObject = await LoadGameObject(id);
+            var instance = Object.Instantiate(gameObject, Vector3.zero, Quaternion.identity);
+            
+            return instance;
+        }
 
-            if (!_loadedAssets.TryGetValue(id, out var asset))
+        public async UniTask<T> Instantiate<T>(string id) where T : MonoBehaviour
+        {
+            var gameObject = await LoadGameObject(id);
+            var instance = Object.Instantiate(gameObject, Vector3.zero, Quaternion.identity);
+            var script = instance.GetComponent<T>();
+
+            if (!script)
             {
-                _loadedAssets.Add(id, new GameObjectAssetHandle(handle, 1));
+                throw new NullReferenceException($"Asset {id} does not have {nameof(T)} attached");
+            }
+            
+            return script;
+        }
+
+        private async UniTask<GameObject> LoadGameObject(string id)
+        {
+            GameObject asset = null;
+            
+            if (_cachedHandles.TryGetValue(id, out var cachedHandle))
+            {
+                cachedHandle.AddInstance();
+                asset = cachedHandle.Asset as GameObject;
             }
             else
             {
-                asset.AddInstance();
+                var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(id);
+                await handle.Task;
+                _cachedHandles.Add(id, new GameObjectAssetHandle(handle, 1));
+                asset = handle.Result;
             }
 
-            if (typeof(MonoBehaviour).IsAssignableFrom(typeof(T)))
-            {
-                var script = handle.Result.GetComponent<T>();
-                return script;
-            }
-            
-            return handle.Result as T;
+            return asset;
         }
 
         public async UniTask<T> Load<T>(string id) where T : Object
         {
-            if (_loadedAssets.ContainsKey(id))
+            if (_cachedHandles.TryGetValue(id, out var cachedHandle))
             {
-                Log.Error($"Asset {id} is already loaded");
-                return null;
+                Log.Warning($"Asset {id} is already loaded, same instance will be provided");
+                return cachedHandle.Asset as T;
             }
 
             var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(id);
             await handle.Task;
             
-            _loadedAssets.Add(id, new ObjectAssetHandle<T>(handle, 0));
+            _cachedHandles.Add(id, new ObjectAssetHandle<T>(handle, 0));
             
             return handle.Result;
         }
 
         public void Destroy<T>(IAsset<T> asset) where T : Object
         {
-            if (!_loadedAssets.TryGetValue(asset.Id, out var loadedAsset))
+            if (!_cachedHandles.TryGetValue(asset.Id, out var loadedAsset))
             {
                 Log.Error($"Asset {asset.Id} is not loaded");
                 return;
@@ -66,16 +87,16 @@ namespace Core.Services.Asset.Addressables
             
             Object.Destroy(asset.Instance);
 
-            if (_loadedAssets[asset.Id].UnloadRequested)
+            if (_cachedHandles[asset.Id].UnloadRequested)
             {
-                _loadedAssets.Remove(asset.Id);
+                _cachedHandles.Remove(asset.Id);
                 Unload(asset);
             }
         }
 
         public void Unload<T>(IAsset<T> asset) where T : Object
         {
-            if (_loadedAssets.TryGetValue(asset.Id, out var handle))
+            if (_cachedHandles.TryGetValue(asset.Id, out var handle))
             {
                 if (handle.Count > 0)
                 {
@@ -88,7 +109,7 @@ namespace Core.Services.Asset.Addressables
             }
             
             handle.Release();
-            _loadedAssets.Remove(asset.Id);
+            _cachedHandles.Remove(asset.Id);
         }
     }
 }
