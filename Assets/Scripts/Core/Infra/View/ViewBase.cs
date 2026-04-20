@@ -1,5 +1,4 @@
-﻿using System;
-using Core.Infra.Broadcaster;
+﻿using Core.Infra.Broadcaster;
 using Core.Infra.Module;
 using UnityEngine;
 
@@ -24,8 +23,7 @@ namespace Core.Infra.View
             
             Provider = provider;
             Module = Provider.GetModule<T>();
-            var baseModule = Module as BaseModule;
-            Broadcaster = baseModule.Broadcaster;
+            Broadcaster = Module.Broadcaster;
             
             ManagedAwake();
             ManagedStart();
@@ -52,6 +50,10 @@ namespace Core.Infra.View
         }
 
         protected virtual void ManagedUpdate()
+        {
+        }
+
+        public void Destroy()
         {
             
         }

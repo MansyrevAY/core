@@ -2,6 +2,7 @@
 using Core.Infra.Module;
 using Core.Infra.Service;
 using Core.Services.Asset;
+using Core.Services.Asset.Addressables;
 using Core.Services.Data;
 using UnityEngine;
 
@@ -14,8 +15,6 @@ namespace Core.Infra.Client
         private InterfaceInstanceMapper<IInternalModule> _internalModuleMapper;
         
         public IBroadcaster Broadcaster { get; private set; }
-        
-        public static IClient Instance;
 
         private void Awake()
         {
@@ -74,7 +73,7 @@ namespace Core.Infra.Client
             where W : class, IInternalModule
         {
             _moduleMapper.Add<T>(module); 
-            _internalModuleMapper.Add<W>(module as W);
+            _internalModuleMapper.Add<W>(module as W); // TODO: look at internals again
         }
 
         public T GetService<T>() where T : class, IService
