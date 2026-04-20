@@ -26,6 +26,18 @@ namespace Core.Services.Asset.Resource
             return Object.Instantiate(handle.Asset) as GameObject;
         }
 
+        public GameObject Instantiate<T>(IInstance<T> instance) where T : Object
+        {
+            if (!_handles.TryGetValue(instance.Id, out var handle))
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(instance.Id)}", $"Handle for asset {instance.Id} not found");
+            }
+            
+            handle.AddInstance();
+            
+            return Object.Instantiate(handle.Asset) as GameObject;
+        }
+
         public async UniTask<T> Instantiate<T>(string id) where T : MonoBehaviour
         {
             var handle = await GetHandle(id);
@@ -70,36 +82,36 @@ namespace Core.Services.Asset.Resource
             return handle.Asset as T;
         }
 
-        public void Destroy<T>(IAsset<T> asset) where T : Object
+        public void Destroy<T>(IInstance<T> instance) where T : Object
         {
-            if (!_handles.TryGetValue(asset.Id, out var handle))
+            if (!_handles.TryGetValue(instance.Id, out var handle))
             {
-                throw new ArgumentOutOfRangeException(nameof(asset.Id), $"No handle found for asset {asset.Id}");
+                throw new ArgumentOutOfRangeException(nameof(instance.Id), $"No handle found for asset {instance.Id}");
             }
             
             handle.RemoveInstance();
-            Object.Destroy(asset.Instance);
+            Object.Destroy(instance.Value);
 
             if (handle.UnloadRequested)
             {
-                Unload(asset);
+                Unload(instance);
             }
         }
 
-        public void Unload<T>(IAsset<T> asset) where T : Object
+        public void Unload<T>(IInstance<T> instance) where T : Object
         {
-            if (!_handles.TryGetValue(asset.Id, out var handle))
+            if (!_handles.TryGetValue(instance.Id, out var handle))
             {
-                throw new ArgumentOutOfRangeException(nameof(asset.Id), $"No handle found for asset {asset.Id}");
+                throw new ArgumentOutOfRangeException(nameof(instance.Id), $"No handle found for asset {instance.Id}");
             }
 
             if (handle.Count > 0)
             {
-                Log.Warning($"There are {handle.Count} undestroyed instances of {asset.Id}, unexpected behavior might follow");
+                Log.Warning($"There are {handle.Count} undestroyed instances of {instance.Id}, unexpected behavior might follow");
             }
             
-            _handles.Remove(asset.Id);
-            Resources.UnloadAsset(asset.Instance);
+            _handles.Remove(instance.Id);
+            Resources.UnloadAsset(instance.Value);
         }
     }
 }

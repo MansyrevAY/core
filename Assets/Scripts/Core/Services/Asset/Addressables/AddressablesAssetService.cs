@@ -25,6 +25,18 @@ namespace Core.Services.Asset.Addressables
             return instance;
         }
 
+        public GameObject Instantiate<T>(IInstance<T> instance) where T : Object
+        {
+            if (!_cachedHandles.TryGetValue(instance.Id, out var handle))
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(instance.Id)}", $"Handle for asset {instance.Id} not found");
+            }
+            
+            handle.AddInstance();
+            
+            return Object.Instantiate(handle.Asset) as GameObject;
+        }
+        
         public async UniTask<T> Instantiate<T>(string id) where T : MonoBehaviour
         {
             var gameObject = await LoadGameObject(id);
@@ -75,32 +87,32 @@ namespace Core.Services.Asset.Addressables
             return handle.Result;
         }
 
-        public void Destroy<T>(IAsset<T> asset) where T : Object
+        public void Destroy<T>(IInstance<T> instance) where T : Object
         {
-            if (!_cachedHandles.TryGetValue(asset.Id, out var loadedAsset))
+            if (!_cachedHandles.TryGetValue(instance.Id, out var loadedAsset))
             {
-                Log.Error($"Asset {asset.Id} is not loaded");
+                Log.Error($"Asset {instance.Id} is not loaded");
                 return;
             }
             
             loadedAsset.RemoveInstance();
             
-            Object.Destroy(asset.Instance);
+            Object.Destroy(instance.Value);
 
-            if (_cachedHandles[asset.Id].UnloadRequested)
+            if (_cachedHandles[instance.Id].UnloadRequested)
             {
-                _cachedHandles.Remove(asset.Id);
-                Unload(asset);
+                _cachedHandles.Remove(instance.Id);
+                Unload(instance);
             }
         }
 
-        public void Unload<T>(IAsset<T> asset) where T : Object
+        public void Unload<T>(IInstance<T> instance) where T : Object
         {
-            if (_cachedHandles.TryGetValue(asset.Id, out var handle))
+            if (_cachedHandles.TryGetValue(instance.Id, out var handle))
             {
                 if (handle.Count > 0)
                 {
-                    Log.Warning($"Unloading asset {asset.Id}, while {handle.Count} instances persist. Unexpected behavior may follow");
+                    Log.Warning($"Unloading asset {instance.Id}, while {handle.Count} instances persist. Unexpected behavior may follow");
                 }
             }
             else
@@ -109,7 +121,7 @@ namespace Core.Services.Asset.Addressables
             }
             
             handle.Release();
-            _cachedHandles.Remove(asset.Id);
+            _cachedHandles.Remove(instance.Id);
         }
     }
 }
