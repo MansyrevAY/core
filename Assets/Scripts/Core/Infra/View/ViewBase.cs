@@ -1,5 +1,6 @@
 ﻿using Core.Infra.Broadcaster;
 using Core.Infra.Module;
+using Core.Services.Asset;
 using UnityEngine;
 
 namespace Core.Infra.View
@@ -11,8 +12,10 @@ namespace Core.Infra.View
         protected T Module { get; private set; }
         
         protected bool Initialized = false;
+        
+        private IAssetService _assetService;
 
-        public void Init(IInternalModuleProvider provider)
+        public void Init(IInternalModuleProvider provider, IAssetService assetService)
         {
             if (Initialized)
             {
@@ -24,6 +27,7 @@ namespace Core.Infra.View
             Provider = provider;
             Module = Provider.GetModule<T>();
             Broadcaster = Module.Broadcaster;
+            _assetService = assetService;
             
             ManagedAwake();
             ManagedStart();
@@ -53,9 +57,14 @@ namespace Core.Infra.View
         {
         }
 
-        public void Destroy()
+        public void Destroy<TG>(IInstance<TG> instance) where TG : Object
         {
-            
+            _assetService.Destroy(instance);
+        }
+
+        public GameObject Instantiate<TG>(IInstance<TG> instance) where TG : Object
+        {
+            return _assetService.Instantiate(instance);
         }
     }
 }
