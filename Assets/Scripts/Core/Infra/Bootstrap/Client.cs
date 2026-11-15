@@ -9,10 +9,6 @@ using UnityEngine;
 
 namespace Core.Infra.Bootstrap
 {
-    // Composition root of the app: builds services and client-lifetime modules by hand, in dependency order.
-    //
-    // Boot order: CreateServices -> InitializeServices (async) -> CreateModules -> modules Start -> StartGame.
-    // Services are fully initialized before any module is built, so modules can rely on them in Start.
     public class Client : MonoBehaviour
     {
         private readonly ModuleScope _modules = new();
@@ -40,7 +36,6 @@ namespace Core.Infra.Bootstrap
             var cancellationToken = destroyCancellationToken;
             await InitializeServices();
 
-            // The client may have been destroyed while the services were loading.
             if (cancellationToken.IsCancellationRequested)
             {
                 return;
@@ -58,8 +53,6 @@ namespace Core.Infra.Bootstrap
             Records = new RecordService(Assets);
         }
 
-        // Async setup of the services built in CreateServices. Override to add more, and call base first
-        // if the extra work needs the records loaded.
         protected virtual UniTask InitializeServices()
         {
             return Records.CreateAll();

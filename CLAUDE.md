@@ -29,6 +29,7 @@ The rules for the docs are in [docs/conventions.md](docs/conventions.md). Read t
 - Do not use spaces or underscores in a folder name. Use PascalCase.
 - Set the `rootNamespace` of each assembly definition to the name of the assembly (`Core`, `Game`).
 - Use minimal comments in code.
+- Avoid `try` and `catch` blocks as much as possible. Refer to the rules in [Diagnostics](docs/architecture/diagnostics.md#rules).
 
 ### Game assembly
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Core.Infra.Logging;
 using Core.Services.Asset;
 using Cysharp.Threading.Tasks;
@@ -36,8 +35,6 @@ namespace Core.Services.Data
             return LoadRecords();
         }
 
-        // Records live in the game's assemblies, not in Core, so scan Core itself plus every
-        // loaded assembly that references it instead of relying on a hardcoded assembly name.
         private static IEnumerable<Type> FindRecordTypes()
         {
             var baseType = typeof(BaseRecord);
@@ -59,18 +56,7 @@ namespace Core.Services.Data
                     continue;
                 }
 
-                Type[] types;
-
-                try
-                {
-                    types = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    types = e.Types.Where(t => t != null).ToArray();
-                }
-
-                foreach (var type in types)
+                foreach (var type in assembly.GetTypes())
                 {
                     if (baseType.IsAssignableFrom(type) && !type.IsAbstract && type.GetConstructor(Type.EmptyTypes) != null)
                     {
@@ -80,7 +66,6 @@ namespace Core.Services.Data
             }
         }
 
-        // Authored values from the storage asset override the code defaults created in CreateAll.
         private async UniTask LoadRecords()
         {
             var storage = await _assetService.Load<RecordStorage>(RecordsStorageName);

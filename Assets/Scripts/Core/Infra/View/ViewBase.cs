@@ -18,9 +18,6 @@ namespace Core.Infra.View
         private IAssetService _assetService;
         private bool _disposed;
 
-        // Views are MonoBehaviours, so they can't take constructor arguments. The owning module passes
-        // everything explicitly: the module itself here, anything else through a typed Inject method
-        // on the concrete view, called before Init.
         public void Init(T module, IAssetService assetService)
         {
             if (Initialized)
@@ -43,9 +40,6 @@ namespace Core.Infra.View
             view.Init(Module, _assetService);
         }
 
-        // Releases what the view acquired in ManagedAwake/ManagedStart (unsubscribe, stop tweens...).
-        // Runs once, when Dispose is called or the GameObject is destroyed, whichever comes first.
-        // Views that were never initialized have nothing to release, so ManagedDispose is skipped for them.
         public void Dispose()
         {
             if (_disposed)

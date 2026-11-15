@@ -27,6 +27,14 @@ This responsibility reports problems. It writes messages and exceptions to the U
 | `RecordService` | A record is missing or has bad data. |
 | `Client.Boot`, `Command.Execute` | A task failed or was cancelled. |
 
+## Rules
+
+- Avoid `try` and `catch` blocks as much as possible. Do not use a `catch` block to hide a failure or to control the flow.
+- Prevent the error instead. Check the condition before the operation. Validate the input and return early.
+- Let an exception go up to a place that already handles it. These places are `FireAndForget`, `Broadcaster`, `ModuleScope` and `Command.Execute`.
+- Use `try` and `finally` only to release a resource that has no other cleanup. Use `catch` only when the code can recover or must add context to the failure.
+- If you must use `catch`, catch the narrowest exception type. Write the exception with `Log.Exception` or throw it again. Do not leave a `catch` block empty.
+
 ## Related responsibilities
 
 - [Messaging](messaging.md), [Bootstrap and lifecycle](bootstrap-and-lifecycle.md), [Modules and views](modules-and-views.md), [Asset management](asset-management.md), [Records](records.md) and [Commands](commands.md) use this responsibility.
