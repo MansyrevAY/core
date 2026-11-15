@@ -37,6 +37,7 @@ There are two implementations. They have the same behavior. They differ in the s
 - Two loads of the same id at the same time are safe. After the wait, the service looks in the dictionary again. It uses the handle that was added first. All callers share one handle, so the instance count stays correct.
 - If a load fails, the service throws `InvalidOperationException`.
 - If the prefab has no component `T`, `Instantiate<T>` reverses the instance count and destroys the copy. Then it throws a `NullReferenceException`.
+- If `instance.Value` is a `Component`, `Destroy` destroys its `GameObject`, all its components and its children.
 - `Destroy` and `Unload` throw `ArgumentOutOfRangeException` for an unknown id. `Unload` logs a warning if instances are still counted. Refer to [Infra/Logging](../../infra/logging.md).
 - `UnloadAtZero` is `false` by default. For this reason, the service does not unload an asset automatically. A caller can set the flag on a handle.
 

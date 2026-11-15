@@ -73,7 +73,7 @@ namespace Core.Services.Asset.Resource
             }
 
             handle.RemoveInstance();
-            Object.Destroy(instance.Value);
+            Object.Destroy(instance.Value is Component component ? component.gameObject : instance.Value);
 
             if (handle.UnloadRequested)
             {
