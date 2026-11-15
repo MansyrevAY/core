@@ -7,14 +7,14 @@ namespace Core.Services.Asset.Resource
         public int Count { get; private set; }
         public bool UnloadAtZero { get; set; }
         public bool UnloadRequested => UnloadAtZero && Count == 0;
-        
+
         public ResourceAssetHandle(Object asset, int count, bool unloadAtZero = false)
         {
             Asset = asset;
             Count = count;
             UnloadAtZero = unloadAtZero;
         }
-        
+
         public void AddInstance()
         {
             Count++;
@@ -28,6 +28,11 @@ namespace Core.Services.Asset.Resource
 
         public void Release()
         {
+            if (Asset is GameObject or Component)
+            {
+                return;
+            }
+
             Resources.UnloadAsset(Asset);
         }
 

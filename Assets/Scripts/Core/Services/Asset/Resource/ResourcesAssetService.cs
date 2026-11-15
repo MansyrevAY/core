@@ -13,12 +13,9 @@ namespace Core.Services.Asset.Resource
 
         public async UniTask<GameObject> Instantiate(string id)
         {
-            var handle = await GetHandle(id);
-            handle.AddInstance();
-            
-            _handles.TryAdd(id, handle);
-            
-            return Object.Instantiate(handle.Asset) as GameObject;
+            var handle = await GetGameObjectHandle(id);
+
+            return InstantiateFrom(handle, id);
         }
 
         public GameObject Instantiate<T>(IInstance<T> instance) where T : Object
@@ -27,42 +24,27 @@ namespace Core.Services.Asset.Resource
             {
                 throw new ArgumentOutOfRangeException($"{nameof(instance.Id)}", $"Handle for asset {instance.Id} not found");
             }
-            
-            handle.AddInstance();
-            
-            return Object.Instantiate(handle.Asset) as GameObject;
+
+            return InstantiateFrom(handle, instance.Id);
         }
 
         public async UniTask<T> Instantiate<T>(string id) where T : MonoBehaviour
         {
-            var handle = await GetHandle(id);
-            handle.AddInstance();
-            
-            _handles.TryAdd(id, handle);
-            
-            var instance = Object.Instantiate(handle.Asset) as GameObject;
+            var handle = await GetGameObjectHandle(id);
+            var instance = InstantiateFrom(handle, id);
             var script = instance.GetComponent<T>();
 
             if (!script)
             {
-                throw new NullReferenceException($"GameObject {id} is missing {nameof(T)}");
+                handle.RemoveInstance();
+                Object.Destroy(instance);
+
+                throw new NullReferenceException($"GameObject {id} is missing {typeof(T).Name}");
             }
-            
+
             return script;
         }
 
-        private async UniTask<ResourceAssetHandle> GetHandle(string id)
-        {
-            if (_handles.TryGetValue(id, out var handle))
-            {
-                return handle;
-            }
-
-            var asset = await Resources.LoadAsync<GameObject>(id);
-            handle = new ResourceAssetHandle(asset, 0);
-            return handle;
-        }
-        
         public async UniTask<T> Load<T>(string id) where T : Object
         {
             if (_handles.TryGetValue(id, out var handle))
@@ -71,10 +53,16 @@ namespace Core.Services.Asset.Resource
             }
 
             var asset = await Resources.LoadAsync<T>(id);
-            handle = new ResourceAssetHandle(asset, 1);
-            _handles.Add(id, handle);
-            
-            return handle.Asset as T;
+            EnsureLoaded(asset, id);
+
+            if (_handles.TryGetValue(id, out handle))
+            {
+                return handle.Asset as T;
+            }
+
+            _handles.Add(id, new ResourceAssetHandle(asset, 1));
+
+            return asset as T;
         }
 
         public void Destroy<T>(IInstance<T> instance) where T : Object
@@ -83,7 +71,7 @@ namespace Core.Services.Asset.Resource
             {
                 throw new ArgumentOutOfRangeException(nameof(instance.Id), $"No handle found for asset {instance.Id}");
             }
-            
+
             handle.RemoveInstance();
             Object.Destroy(instance.Value);
 
@@ -104,9 +92,50 @@ namespace Core.Services.Asset.Resource
             {
                 Log.Warning($"There are {handle.Count} undestroyed instances of {instance.Id}, unexpected behavior might follow");
             }
-            
+
             _handles.Remove(instance.Id);
-            Resources.UnloadAsset(instance.Value);
+            handle.Release();
+        }
+
+        private async UniTask<ResourceAssetHandle> GetGameObjectHandle(string id)
+        {
+            if (_handles.TryGetValue(id, out var handle))
+            {
+                return handle;
+            }
+
+            var asset = await Resources.LoadAsync<GameObject>(id);
+            EnsureLoaded(asset, id);
+
+            if (_handles.TryGetValue(id, out handle))
+            {
+                return handle;
+            }
+
+            handle = new ResourceAssetHandle(asset, 0);
+            _handles.Add(id, handle);
+
+            return handle;
+        }
+
+        private static GameObject InstantiateFrom(ResourceAssetHandle handle, string id)
+        {
+            if (handle.Asset is not GameObject prefab)
+            {
+                throw new InvalidOperationException($"Asset {id} is not a GameObject and can't be instantiated");
+            }
+
+            handle.AddInstance();
+
+            return Object.Instantiate(prefab);
+        }
+
+        private static void EnsureLoaded(Object asset, string id)
+        {
+            if (!asset)
+            {
+                throw new InvalidOperationException($"Failed to load resource {id}");
+            }
         }
     }
 }
