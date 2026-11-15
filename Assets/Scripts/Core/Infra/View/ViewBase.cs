@@ -1,11 +1,14 @@
-﻿using Core.Infra.Broadcaster;
+﻿using System;
+using Core.Infra.Logging;
+using Core.Infra.Messaging;
 using Core.Infra.Module;
 using Core.Services.Asset;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Core.Infra.View
 {
-    public abstract class ViewBase<T> : MonoBehaviour where T: class, IInternalModule
+    public abstract class ViewBase<T> : MonoBehaviour, IDisposable where T: class, IInternalModule
     {
         protected IBroadcaster Broadcaster { get; private set; }
         protected T Module { get; private set; }
@@ -13,6 +16,7 @@ namespace Core.Infra.View
         protected bool Initialized = false;
 
         private IAssetService _assetService;
+        private bool _disposed;
 
         // Views are MonoBehaviours, so they can't take constructor arguments. The owning module passes
         // everything explicitly: the module itself here, anything else through a typed Inject method
@@ -21,7 +25,7 @@ namespace Core.Infra.View
         {
             if (Initialized)
             {
-                Log.Log.Warning($"{GetType().Name} on {gameObject.name} is already initialized, aborting");
+                Log.Warning($"{GetType().Name} on {gameObject.name} is already initialized, aborting");
                 return;
             }
             Initialized = true;
@@ -39,6 +43,29 @@ namespace Core.Infra.View
             view.Init(Module, _assetService);
         }
 
+        // Releases what the view acquired in ManagedAwake/ManagedStart (unsubscribe, stop tweens...).
+        // Runs once, when Dispose is called or the GameObject is destroyed, whichever comes first.
+        // Views that were never initialized have nothing to release, so ManagedDispose is skipped for them.
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            _disposed = true;
+
+            if (Initialized)
+            {
+                ManagedDispose();
+            }
+        }
+
+        // Note: a subclass that declares its own OnDestroy hides this one. Override ManagedDispose instead.
+        private void OnDestroy()
+        {
+            Dispose();
+        }
+
         protected virtual void ManagedAwake()
         {
             
@@ -49,9 +76,13 @@ namespace Core.Infra.View
             
         }
 
+        protected virtual void ManagedDispose()
+        {
+        }
+
         private void Update()
         {
-            if (!Initialized)
+            if (!Initialized || _disposed)
             {
                 return;
             }

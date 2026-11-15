@@ -1,4 +1,4 @@
-﻿using Core.Infra.Broadcaster;
+﻿using Core.Infra.Messaging;
 
 namespace Core.Infra.Module
 {

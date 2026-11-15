@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Infra.Log
+namespace Core.Infra.Logging
 {
     public static class Log
     {

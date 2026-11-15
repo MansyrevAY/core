@@ -1,8 +1,9 @@
 ﻿using System;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
-namespace Core.Services.Asset.Addressables
+namespace Core.Services.Asset.Addressable
 {
     public class ObjectAssetHandle<T> : IAssetHandle where T : Object
     {
@@ -33,7 +34,7 @@ namespace Core.Services.Asset.Addressables
 
         public void Release()
         {
-            UnityEngine.AddressableAssets.Addressables.Release(_handle);
+            Addressables.Release(_handle);
         }
 
         public Object Asset { get; }

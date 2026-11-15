@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Core.Infra.Log;
+using Core.Infra.Logging;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
-namespace Core.Services.Asset.Addressables
+namespace Core.Services.Asset.Addressable
 {
     public class AddressablesAssetService : IAssetService
     {
@@ -53,14 +54,14 @@ namespace Core.Services.Asset.Addressables
                 return handle.Asset as T;
             }
 
-            var operation = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(id);
+            var operation = Addressables.LoadAssetAsync<T>(id);
             await operation.Task;
             EnsureSucceeded(operation, id);
 
             // The same asset may have been registered by a concurrent request while we were awaiting.
             if (_handles.TryGetValue(id, out handle))
             {
-                UnityEngine.AddressableAssets.Addressables.Release(operation);
+                Addressables.Release(operation);
                 return handle.Asset as T;
             }
 
@@ -108,14 +109,14 @@ namespace Core.Services.Asset.Addressables
                 return handle;
             }
 
-            var operation = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(id);
+            var operation = Addressables.LoadAssetAsync<GameObject>(id);
             await operation.Task;
             EnsureSucceeded(operation, id);
 
             // The same asset may have been registered by a concurrent request while we were awaiting.
             if (_handles.TryGetValue(id, out handle))
             {
-                UnityEngine.AddressableAssets.Addressables.Release(operation);
+                Addressables.Release(operation);
                 return handle;
             }
 
@@ -145,7 +146,7 @@ namespace Core.Services.Asset.Addressables
             }
 
             var exception = operation.OperationException;
-            UnityEngine.AddressableAssets.Addressables.Release(operation);
+            Addressables.Release(operation);
 
             throw new InvalidOperationException($"Failed to load addressable asset {id}", exception);
         }

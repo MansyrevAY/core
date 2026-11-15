@@ -1,7 +1,7 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 
-namespace Core.Infra.Command
+namespace Core.Infra.Commands
 {
     public class SimpleStep : IStep
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Core.Infra.Broadcaster
+namespace Core.Infra.Messaging
 {
     public abstract class AsyncEvent
     {

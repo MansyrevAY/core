@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace Core.Services.Asset.Addressables
+namespace Core.Services.Asset.Addressable
 {
     public class GameObjectAssetHandle : ObjectAssetHandle<GameObject>
     {

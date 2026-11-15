@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Core.Infra.Utils;
 using Cysharp.Threading.Tasks;
 
-namespace Core.Infra.Command
+namespace Core.Infra.Commands
 {
     public abstract class Command
     {
@@ -10,7 +11,7 @@ namespace Core.Infra.Command
         
         public void Execute()
         {
-            ExecuteAsync().Forget();
+            ExecuteAsync().FireAndForget();
         }
 
         public async UniTask ExecuteAsync()

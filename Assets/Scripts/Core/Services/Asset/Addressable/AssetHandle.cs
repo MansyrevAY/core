@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Core.Services.Asset.Addressables
+namespace Core.Services.Asset.Addressable
 {
     public struct AssetHandle
     {
