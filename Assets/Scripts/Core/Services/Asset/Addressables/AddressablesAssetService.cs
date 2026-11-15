@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Core.Infra.Log;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using IServiceProvider = Core.Infra.Service.IServiceProvider;
 using Object = UnityEngine.Object;
 
@@ -10,118 +11,148 @@ namespace Core.Services.Asset.Addressables
 {
     public class AddressablesAssetService : IAssetService
     {
-        private readonly Dictionary<string, IAssetHandle> _cachedHandles = new();
-        
+        private readonly Dictionary<string, IAssetHandle> _handles = new();
+
         public void Init(IServiceProvider provider)
         {
-            
         }
 
         public async UniTask<GameObject> Instantiate(string id)
         {
-            var gameObject = await LoadGameObject(id);
-            var instance = Object.Instantiate(gameObject, Vector3.zero, Quaternion.identity);
-            
-            return instance;
+            var handle = await GetGameObjectHandle(id);
+
+            return InstantiateFrom(handle, id);
         }
 
         public GameObject Instantiate<T>(IInstance<T> instance) where T : Object
         {
-            if (!_cachedHandles.TryGetValue(instance.Id, out var handle))
+            if (!_handles.TryGetValue(instance.Id, out var handle))
             {
                 throw new ArgumentOutOfRangeException($"{nameof(instance.Id)}", $"Handle for asset {instance.Id} not found");
             }
-            
-            handle.AddInstance();
-            
-            return Object.Instantiate(handle.Asset) as GameObject;
+
+            return InstantiateFrom(handle, instance.Id);
         }
-        
+
         public async UniTask<T> Instantiate<T>(string id) where T : MonoBehaviour
         {
-            var gameObject = await LoadGameObject(id);
-            var instance = Object.Instantiate(gameObject, Vector3.zero, Quaternion.identity);
+            var handle = await GetGameObjectHandle(id);
+            var instance = InstantiateFrom(handle, id);
             var script = instance.GetComponent<T>();
 
             if (!script)
             {
-                throw new NullReferenceException($"Asset {id} does not have {nameof(T)} attached");
+                handle.RemoveInstance();
+                Object.Destroy(instance);
+
+                throw new NullReferenceException($"GameObject {id} is missing {typeof(T).Name}");
             }
-            
+
             return script;
-        }
-
-        private async UniTask<GameObject> LoadGameObject(string id)
-        {
-            GameObject asset = null;
-            
-            if (_cachedHandles.TryGetValue(id, out var cachedHandle))
-            {
-                cachedHandle.AddInstance();
-                asset = cachedHandle.Asset as GameObject;
-            }
-            else
-            {
-                var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(id);
-                await handle.Task;
-                _cachedHandles.Add(id, new GameObjectAssetHandle(handle, 1));
-                asset = handle.Result;
-            }
-
-            return asset;
         }
 
         public async UniTask<T> Load<T>(string id) where T : Object
         {
-            if (_cachedHandles.TryGetValue(id, out var cachedHandle))
+            if (_handles.TryGetValue(id, out var handle))
             {
-                Log.Warning($"Asset {id} is already loaded, same instance will be provided");
-                return cachedHandle.Asset as T;
+                return handle.Asset as T;
             }
 
-            var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(id);
-            await handle.Task;
-            
-            _cachedHandles.Add(id, new ObjectAssetHandle<T>(handle, 0));
-            
-            return handle.Result;
+            var operation = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(id);
+            await operation.Task;
+            EnsureSucceeded(operation, id);
+
+            // The same asset may have been registered by a concurrent request while we were awaiting.
+            if (_handles.TryGetValue(id, out handle))
+            {
+                UnityEngine.AddressableAssets.Addressables.Release(operation);
+                return handle.Asset as T;
+            }
+
+            _handles.Add(id, new ObjectAssetHandle<T>(operation, 1));
+
+            return operation.Result;
         }
 
         public void Destroy<T>(IInstance<T> instance) where T : Object
         {
-            if (!_cachedHandles.TryGetValue(instance.Id, out var loadedAsset))
+            if (!_handles.TryGetValue(instance.Id, out var handle))
             {
-                Log.Error($"Asset {instance.Id} is not loaded");
-                return;
+                throw new ArgumentOutOfRangeException(nameof(instance.Id), $"No handle found for asset {instance.Id}");
             }
-            
-            loadedAsset.RemoveInstance();
-            
+
+            handle.RemoveInstance();
             Object.Destroy(instance.Value);
 
-            if (_cachedHandles[instance.Id].UnloadRequested)
+            if (handle.UnloadRequested)
             {
-                _cachedHandles.Remove(instance.Id);
                 Unload(instance);
             }
         }
 
         public void Unload<T>(IInstance<T> instance) where T : Object
         {
-            if (_cachedHandles.TryGetValue(instance.Id, out var handle))
+            if (!_handles.TryGetValue(instance.Id, out var handle))
             {
-                if (handle.Count > 0)
-                {
-                    Log.Warning($"Unloading asset {instance.Id}, while {handle.Count} instances persist. Unexpected behavior may follow");
-                }
+                throw new ArgumentOutOfRangeException(nameof(instance.Id), $"No handle found for asset {instance.Id}");
             }
-            else
+
+            if (handle.Count > 0)
+            {
+                Log.Warning($"There are {handle.Count} undestroyed instances of {instance.Id}, unexpected behavior might follow");
+            }
+
+            _handles.Remove(instance.Id);
+            handle.Release();
+        }
+
+        private async UniTask<IAssetHandle> GetGameObjectHandle(string id)
+        {
+            if (_handles.TryGetValue(id, out var handle))
+            {
+                return handle;
+            }
+
+            var operation = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(id);
+            await operation.Task;
+            EnsureSucceeded(operation, id);
+
+            // The same asset may have been registered by a concurrent request while we were awaiting.
+            if (_handles.TryGetValue(id, out handle))
+            {
+                UnityEngine.AddressableAssets.Addressables.Release(operation);
+                return handle;
+            }
+
+            handle = new GameObjectAssetHandle(operation, 0);
+            _handles.Add(id, handle);
+
+            return handle;
+        }
+
+        private static GameObject InstantiateFrom(IAssetHandle handle, string id)
+        {
+            if (handle.Asset is not GameObject prefab)
+            {
+                throw new InvalidOperationException($"Asset {id} is not a GameObject and can't be instantiated");
+            }
+
+            handle.AddInstance();
+
+            return Object.Instantiate(prefab);
+        }
+
+        private static void EnsureSucceeded<T>(AsyncOperationHandle<T> operation, string id)
+        {
+            if (operation.Status == AsyncOperationStatus.Succeeded)
             {
                 return;
             }
-            
-            handle.Release();
-            _cachedHandles.Remove(instance.Id);
+
+            var exception = operation.OperationException;
+            UnityEngine.AddressableAssets.Addressables.Release(operation);
+
+            throw new InvalidOperationException($"Failed to load addressable asset {id}", exception);
         }
     }
 }

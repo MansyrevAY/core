@@ -1,5 +1,4 @@
 ﻿using System;
-using Core.Infra.Log;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
@@ -34,12 +33,6 @@ namespace Core.Services.Asset.Addressables
 
         public void Release()
         {
-            if (Count > 0)
-            {
-                Log.Error($"Can't release asset handle {_handle.DebugName}, {Count} instances persist");
-                return;
-            }
-            
             UnityEngine.AddressableAssets.Addressables.Release(_handle);
         }
 
