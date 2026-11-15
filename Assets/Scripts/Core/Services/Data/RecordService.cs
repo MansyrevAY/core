@@ -5,7 +5,6 @@ using System.Reflection;
 using Core.Infra.Log;
 using Core.Services.Asset;
 using Cysharp.Threading.Tasks;
-using IServiceProvider = Core.Infra.Service.IServiceProvider;
 
 namespace Core.Services.Data
 {
@@ -15,11 +14,11 @@ namespace Core.Services.Data
 
         private readonly Dictionary<Type, BaseRecord> _records = new();
 
-        private IAssetService _assetService;
+        private readonly IAssetService _assetService;
 
-        public void Init(IServiceProvider provider)
+        public RecordService(IAssetService assetService)
         {
-            _assetService = provider.GetService<IAssetService>();
+            _assetService = assetService;
         }
 
         public UniTask CreateAll()

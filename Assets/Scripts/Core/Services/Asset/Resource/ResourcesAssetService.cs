@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Core.Infra.Log;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using IServiceProvider = Core.Infra.Service.IServiceProvider;
 using Object = UnityEngine.Object;
 
 namespace Core.Services.Asset.Resource
@@ -11,10 +10,6 @@ namespace Core.Services.Asset.Resource
     public class ResourcesAssetService : IAssetService
     {
         private readonly Dictionary<string, ResourceAssetHandle> _handles = new();
-        
-        public void Init(IServiceProvider provider)
-        {
-        }
 
         public async UniTask<GameObject> Instantiate(string id)
         {

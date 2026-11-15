@@ -7,15 +7,17 @@ namespace Core.Infra.View
 {
     public abstract class ViewBase<T> : MonoBehaviour where T: class, IInternalModule
     {
-        protected IInternalModuleProvider Provider { get; private set; }
         protected IBroadcaster Broadcaster { get; private set; }
         protected T Module { get; private set; }
-        
+
         protected bool Initialized = false;
-        
+
         private IAssetService _assetService;
 
-        public void Init(IInternalModuleProvider provider, IAssetService assetService)
+        // Views are MonoBehaviours, so they can't take constructor arguments. The owning module passes
+        // everything explicitly: the module itself here, anything else through a typed Inject method
+        // on the concrete view, called before Init.
+        public void Init(T module, IAssetService assetService)
         {
             if (Initialized)
             {
@@ -23,9 +25,8 @@ namespace Core.Infra.View
                 return;
             }
             Initialized = true;
-            
-            Provider = provider;
-            Module = Provider.GetModule<T>();
+
+            Module = module;
             Broadcaster = Module.Broadcaster;
             _assetService = assetService;
             
@@ -35,7 +36,7 @@ namespace Core.Infra.View
 
         protected void InitChild(ViewBase<T> view)
         {
-            view.Init(Provider, _assetService);
+            view.Init(Module, _assetService);
         }
 
         protected virtual void ManagedAwake()

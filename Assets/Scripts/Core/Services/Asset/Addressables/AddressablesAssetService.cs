@@ -4,7 +4,6 @@ using Core.Infra.Log;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using IServiceProvider = Core.Infra.Service.IServiceProvider;
 using Object = UnityEngine.Object;
 
 namespace Core.Services.Asset.Addressables
@@ -12,10 +11,6 @@ namespace Core.Services.Asset.Addressables
     public class AddressablesAssetService : IAssetService
     {
         private readonly Dictionary<string, IAssetHandle> _handles = new();
-
-        public void Init(IServiceProvider provider)
-        {
-        }
 
         public async UniTask<GameObject> Instantiate(string id)
         {

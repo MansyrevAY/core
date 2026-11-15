@@ -1,10 +1,9 @@
-﻿using Core.Infra.Client;
-
-namespace Core.Infra.Module
+﻿namespace Core.Infra.Module
 {
     public interface IModule
     {
-        void Init(IClient client);
-        void Cleanup(IClient client);
+        // Side effects only (subscribe, create entities, find scene objects). Dependencies arrive via the constructor.
+        void Start();
+        void Cleanup();
     }
 }
