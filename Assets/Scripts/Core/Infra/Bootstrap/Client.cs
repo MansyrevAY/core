@@ -37,10 +37,11 @@ namespace Core.Infra.Bootstrap
 
         private async UniTask Boot()
         {
+            var cancellationToken = destroyCancellationToken;
             await InitializeServices();
 
             // The client may have been destroyed while the services were loading.
-            if (destroyCancellationToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }

@@ -13,7 +13,7 @@ Responsibilities: [Bootstrap and lifecycle](../bootstrap-and-lifecycle.md), [Mes
 ## Boot order
 
 1. `Awake` makes the client `Broadcaster`. It calls `CreateServices()`. Then it starts `Boot()` and does not wait for the result.
-2. `Boot()` waits for `InitializeServices()`. The base method calls `RecordService.CreateAll()`. The records are loaded before any module exists.
+2. `Boot()` stores `destroyCancellationToken` before it waits for `InitializeServices()`. The base method calls `RecordService.CreateAll()`. The records are loaded before any module exists.
 3. If the client is destroyed during this load (`destroyCancellationToken`), `Boot()` stops.
 4. `CreateModules()` builds the modules. The base method is empty.
 5. `ModuleScope.Start()` starts each module in the order of addition.
