@@ -30,14 +30,25 @@ namespace Core.Infra.View
             Module = module;
             Broadcaster = Module.Broadcaster;
             _assetService = assetService;
-            
+
             ManagedAwake();
             ManagedStart();
         }
 
-        protected void InitChild(ViewBase<T> view)
+        private void Update()
         {
-            view.Init(Module, _assetService);
+            if (!Initialized || _disposed)
+            {
+                return;
+            }
+
+            ManagedUpdate();
+        }
+
+        // Note: a subclass that declares its own OnDestroy hides this one. Override ManagedDispose instead.
+        private void OnDestroy()
+        {
+            Dispose();
         }
 
         public void Dispose()
@@ -54,40 +65,6 @@ namespace Core.Infra.View
             }
         }
 
-        // Note: a subclass that declares its own OnDestroy hides this one. Override ManagedDispose instead.
-        private void OnDestroy()
-        {
-            Dispose();
-        }
-
-        protected virtual void ManagedAwake()
-        {
-            
-        }
-
-        protected virtual void ManagedStart()
-        {
-            
-        }
-
-        protected virtual void ManagedDispose()
-        {
-        }
-
-        private void Update()
-        {
-            if (!Initialized || _disposed)
-            {
-                return;
-            }
-            
-            ManagedUpdate();
-        }
-
-        protected virtual void ManagedUpdate()
-        {
-        }
-
         public void Destroy<TG>(IInstance<TG> instance) where TG : Object
         {
             _assetService.Destroy(instance);
@@ -96,6 +73,27 @@ namespace Core.Infra.View
         public GameObject Instantiate<TG>(IInstance<TG> instance) where TG : Object
         {
             return _assetService.Instantiate(instance);
+        }
+
+        protected void InitChild(ViewBase<T> view)
+        {
+            view.Init(Module, _assetService);
+        }
+
+        protected virtual void ManagedAwake()
+        {
+        }
+
+        protected virtual void ManagedStart()
+        {
+        }
+
+        protected virtual void ManagedDispose()
+        {
+        }
+
+        protected virtual void ManagedUpdate()
+        {
         }
     }
 }

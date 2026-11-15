@@ -9,7 +9,7 @@ namespace Core.Services.Data
 {
     public class RecordService : IRecordService
     {
-        private const string RecordsStorageName = "RecordsStorage";
+        private const string RECORDS_STORAGE_NAME = "RecordsStorage";
 
         private readonly Dictionary<Type, BaseRecord> _records = new();
 
@@ -33,6 +33,17 @@ namespace Core.Services.Data
             }
 
             return LoadRecords();
+        }
+
+        public T GetRecord<T>() where T : BaseRecord
+        {
+            if (_records.TryGetValue(typeof(T), out var record))
+            {
+                return record as T;
+            }
+
+            Log.Error($"Could not find record of type {typeof(T).Name}, returning null.");
+            return null;
         }
 
         private static IEnumerable<Type> FindRecordTypes()
@@ -68,11 +79,11 @@ namespace Core.Services.Data
 
         private async UniTask LoadRecords()
         {
-            var storage = await _assetService.Load<RecordStorage>(RecordsStorageName);
+            var storage = await _assetService.Load<RecordStorage>(RECORDS_STORAGE_NAME);
 
             if (storage == null || storage.Records == null)
             {
-                Log.Warning($"Record storage '{RecordsStorageName}' not found, using default records");
+                Log.Warning($"Record storage '{RECORDS_STORAGE_NAME}' not found, using default records");
                 return;
             }
 
@@ -80,7 +91,7 @@ namespace Core.Services.Data
             {
                 if (recordObject == null || recordObject.Record == null)
                 {
-                    Log.Warning($"Empty record entry in '{RecordsStorageName}', ignoring");
+                    Log.Warning($"Empty record entry in '{RECORDS_STORAGE_NAME}', ignoring");
                     continue;
                 }
 
@@ -94,17 +105,6 @@ namespace Core.Services.Data
 
                 _records[type] = recordObject.Record;
             }
-        }
-
-        public T GetRecord<T>() where T : BaseRecord
-        {
-            if (_records.TryGetValue(typeof(T), out var record))
-            {
-                return record as T;
-            }
-
-            Log.Error($"Could not find record of type {typeof(T).Name}, returning null.");
-            return null;
         }
     }
 }
