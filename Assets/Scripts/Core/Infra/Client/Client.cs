@@ -2,7 +2,7 @@
 using Core.Infra.Module;
 using Core.Infra.Service;
 using Core.Services.Asset;
-using Core.Services.Asset.Addressables;
+using Core.Services.Asset.Resource;
 using Core.Services.Data;
 using UnityEngine;
 
@@ -34,7 +34,7 @@ namespace Core.Infra.Client
 
         protected virtual void CreateServices()
         {
-            AddService<IAssetService>(new AddressablesAssetService());
+            AddService<IAssetService>(new ResourcesAssetService());
             AddService<IRecordService>(new RecordService());
         }
 
@@ -63,17 +63,31 @@ namespace Core.Infra.Client
             _serviceMapper.Add<T>(service); 
         }
 
-        protected void AddModule<T>(T module) where T : class, IModule
+        public void AddModule<T>(T module) where T : class, IModule
         {
             _moduleMapper.Add<T>(module); 
         }
         
-        protected void AddModule<T, W>(T module) 
+        public void AddModule<T, W>(T module)
             where T : class, IModule
             where W : class, IInternalModule
         {
             _moduleMapper.Add<T>(module); 
             _internalModuleMapper.Add<W>(module as W); // TODO: look at internals again
+        }
+
+        public void RemoveModule<T>() where T : class, IModule
+        {
+            var module = _moduleMapper.Get<T>();
+            module.Cleanup(this);
+            
+            _moduleMapper.Remove<T>();
+        }
+
+        public void RemoveModule<T, W>() where T : class, IModule where W : class, IInternalModule
+        {
+            RemoveModule<T>();
+            _internalModuleMapper.Remove<W>();
         }
 
         public T GetService<T>() where T : class, IService

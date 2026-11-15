@@ -10,6 +10,7 @@ namespace Core.Infra.Broadcaster
         void Broadcast<T>(T message) where T : Event;
         
         void SubscribeAsync<T>(Func<T, UniTask> callback) where T : AsyncEvent;
+        void UnsubscribeAsync<T>(Func<T, UniTask> callback) where T : AsyncEvent;
         UniTask BroadcastAsync<T>(T message) where T : AsyncEvent;
     }
 }

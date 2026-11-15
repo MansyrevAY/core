@@ -75,7 +75,7 @@ namespace Core.Services.Asset.Resource
                 return handle.Asset as T;
             }
 
-            var asset = await Resources.LoadAsync<GameObject>(id);
+            var asset = await Resources.LoadAsync<T>(id);
             handle = new ResourceAssetHandle(asset, 1);
             _handles.Add(id, handle);
             

@@ -33,6 +33,11 @@ namespace Core.Infra.View
             ManagedStart();
         }
 
+        protected void InitChild(ViewBase<T> view)
+        {
+            view.Init(Provider, _assetService);
+        }
+
         protected virtual void ManagedAwake()
         {
             

@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Core.Infra.Command
 {
-    public class Command
+    public abstract class Command
     {
         private readonly List<IStep> _steps = new();
         

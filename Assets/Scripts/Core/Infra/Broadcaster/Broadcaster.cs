@@ -60,24 +60,34 @@ namespace Core.Infra.Broadcaster
             _subscribers[type].Add(callback);
         }
 
-        public UniTask BroadcastAsync<T>(T message) where T : AsyncEvent
+        public void UnsubscribeAsync<T>(Func<T, UniTask> callback) where T : AsyncEvent
+        {
+            var type = typeof(T);
+
+            if (!_subscribers.TryGetValue(type, out var subscriber))
+            {
+                return;
+            }
+            
+            subscriber.Remove(callback);
+        }
+
+        public async UniTask BroadcastAsync<T>(T message) where T : AsyncEvent
         {
             var type = typeof(T);
 
             if (!_subscribers.TryGetValue(type, out var subscribers))
             {
-                return UniTask.CompletedTask;
+                return;
             }
             
             foreach (var subscriber in subscribers)
             {
                 if (subscriber is Func<T, UniTask> action)
                 {
-                    action(message);
+                   await action(message);
                 }
             }
-            
-            return UniTask.CompletedTask;
         }
     }
 }
