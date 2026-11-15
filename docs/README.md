@@ -15,7 +15,8 @@ The docs have three levels.
 ```
 docs/
 ├── README.md                   this file
-├── conventions.md              rules for the language, structure and content
+├── conventions.md              rules for the language, structure and content of the docs
+├── code-style.md               rules for the naming, formatting and order of the C# code
 └── architecture/
     ├── overview.md             assembly, boot sequence, main ideas
     ├── <responsibility>.md     high-level pages (level 2)
@@ -41,4 +42,4 @@ Read the [overview](architecture/overview.md) first. Then read the responsibilit
 
 ## Conventions
 
-The rules for the language, the structure and the content of these docs are in [conventions](conventions.md). All documents use ASD-STE100 Simplified Technical English.
+The rules for the language, the structure and the content of these docs are in [conventions](conventions.md). The rules for the C# code are in [code style](code-style.md). All documents use ASD-STE100 Simplified Technical English.

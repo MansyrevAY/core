@@ -23,7 +23,7 @@ The `RecordsStorage` asset must be in a place that the asset service can load, f
 ## RecordService.CreateAll
 
 1. It clears the record dictionary.
-2. It scans each loaded assembly that is not dynamic and that is `Core` or references `Core`. It finds each concrete `BaseRecord` subclass that has a constructor without parameters. It makes a default instance of each. If an assembly cannot load all its types, the service uses the types that did load.
+2. It scans each loaded assembly that is not dynamic and that is `Core` or references `Core`. It finds each concrete `BaseRecord` subclass that has a constructor without parameters. It makes a default instance of each. If an assembly cannot load all its types, `CreateAll` throws and the boot stops.
 3. It loads `RecordsStorage` through the asset service. It replaces each default instance with the stored instance of the same type.
 
 `GetRecord<T>()` returns the record. If the type is unknown, it logs an error and returns `null`.
@@ -48,3 +48,4 @@ Refer to [Infra/Logging](../infra/logging.md).
 
 - All users share the record instances. The instances can change. A game must not store runtime state in a record unless it accepts this.
 - `CreateAll` reads the types of every assembly that references `Core`. It does not need a fixed assembly name.
+- `CreateAll` does not catch `ReflectionTypeLoadException`. A type that fails to load in a game assembly is a defect that must be fixed.

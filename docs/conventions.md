@@ -1,6 +1,6 @@
 # Documentation conventions
 
-These rules apply to all documents in `docs/`. Refer to the [README](README.md) for the index.
+These rules apply to all documents in `docs/`. The rules for the code are in [code style](code-style.md). Refer to the [README](README.md) for the index.
 
 ## Language
 

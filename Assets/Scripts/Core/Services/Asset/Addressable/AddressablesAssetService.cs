@@ -58,7 +58,6 @@ namespace Core.Services.Asset.Addressable
             await operation.Task;
             EnsureSucceeded(operation, id);
 
-            // The same asset may have been registered by a concurrent request while we were awaiting.
             if (_handles.TryGetValue(id, out handle))
             {
                 Addressables.Release(operation);
@@ -113,7 +112,6 @@ namespace Core.Services.Asset.Addressable
             await operation.Task;
             EnsureSucceeded(operation, id);
 
-            // The same asset may have been registered by a concurrent request while we were awaiting.
             if (_handles.TryGetValue(id, out handle))
             {
                 Addressables.Release(operation);

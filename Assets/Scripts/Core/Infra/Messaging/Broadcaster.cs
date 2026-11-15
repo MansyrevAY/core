@@ -7,10 +7,7 @@ namespace Core.Infra.Messaging
 {
     public class Broadcaster : IBroadcaster
     {
-        // Subscriber arrays are copy-on-write: Subscribe/Unsubscribe always swap in a new array and never
-        // mutate one in place. A broadcast in flight keeps iterating the array it started with, so handlers
-        // can safely subscribe or unsubscribe (including themselves) while an event is being dispatched.
-        // A handler removed mid-dispatch still receives the event currently being delivered.
+        // Copy-on-write subscriber arrays: handlers can subscribe or unsubscribe during dispatch.
         private readonly Dictionary<Type, Delegate[]> _subscribers = new();
 
         public void Subscribe<T>(Action<T> callback) where T : Event
@@ -30,7 +27,6 @@ namespace Core.Infra.Messaging
                 return;
             }
 
-            // One failing handler must not stop the rest from receiving the event.
             foreach (var subscriber in subscribers)
             {
                 try
@@ -54,8 +50,6 @@ namespace Core.Infra.Messaging
             Remove(typeof(T), callback);
         }
 
-        // Handlers run one after another, in subscription order. A handler that throws is logged and skipped;
-        // cancellation still propagates and stops the broadcast.
         public async UniTask BroadcastAsync<T>(T message) where T : AsyncEvent
         {
             if (!_subscribers.TryGetValue(typeof(T), out var subscribers))

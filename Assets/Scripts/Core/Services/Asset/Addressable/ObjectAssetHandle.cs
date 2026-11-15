@@ -10,6 +10,7 @@ namespace Core.Services.Asset.Addressable
         public int Count { get; private set; }
         public bool UnloadAtZero { get; set; }
         public bool UnloadRequested => UnloadAtZero && Count == 0;
+        public Object Asset { get; }
 
         private AsyncOperationHandle<T> _handle;
 
@@ -36,7 +37,5 @@ namespace Core.Services.Asset.Addressable
         {
             Addressables.Release(_handle);
         }
-
-        public Object Asset { get; }
     }
 }

@@ -28,7 +28,12 @@ The rules for the docs are in [docs/conventions.md](docs/conventions.md). Read t
 - Make the folder names reflect the namespace names. The namespace of a file is the path of its folder under `Assets/Scripts`. For example, `Assets/Scripts/Core/Infra/Module` has the namespace `Core.Infra.Module`.
 - Do not use spaces or underscores in a folder name. Use PascalCase.
 - Set the `rootNamespace` of each assembly definition to the name of the assembly (`Core`, `Game`).
+- Follow the [code style](docs/code-style.md) rules. In short:
+  - Start a private member with `_`. Start a protected member, a public member and a property with an upper case letter. Use PascalCase for classes and methods. Write a constant in upper case with underscores, for example `CARD_TITLE`.
+  - Put an opening curly bracket on the next line. Use `var` where possible. Always use brackets with `if` and loops.
+  - Order the members: fields and properties, then the constructor and init and dispose methods, then public methods, then protected methods, then private methods. A calling method goes above the methods that it calls. This rule is more important than the order of the groups.
 - Use minimal comments in code.
+- Avoid `try` and `catch` blocks as much as possible. Refer to the rules in [Diagnostics](docs/architecture/diagnostics.md#rules).
 
 ### Game assembly
 

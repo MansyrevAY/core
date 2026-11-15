@@ -18,9 +18,6 @@ namespace Core.Infra.View
         private IAssetService _assetService;
         private bool _disposed;
 
-        // Views are MonoBehaviours, so they can't take constructor arguments. The owning module passes
-        // everything explicitly: the module itself here, anything else through a typed Inject method
-        // on the concrete view, called before Init.
         public void Init(T module, IAssetService assetService)
         {
             if (Initialized)
@@ -33,19 +30,27 @@ namespace Core.Infra.View
             Module = module;
             Broadcaster = Module.Broadcaster;
             _assetService = assetService;
-            
+
             ManagedAwake();
             ManagedStart();
         }
 
-        protected void InitChild(ViewBase<T> view)
+        private void Update()
         {
-            view.Init(Module, _assetService);
+            if (!Initialized || _disposed)
+            {
+                return;
+            }
+
+            ManagedUpdate();
         }
 
-        // Releases what the view acquired in ManagedAwake/ManagedStart (unsubscribe, stop tweens...).
-        // Runs once, when Dispose is called or the GameObject is destroyed, whichever comes first.
-        // Views that were never initialized have nothing to release, so ManagedDispose is skipped for them.
+        // Note: a subclass that declares its own OnDestroy hides this one. Override ManagedDispose instead.
+        private void OnDestroy()
+        {
+            Dispose();
+        }
+
         public void Dispose()
         {
             if (_disposed)
@@ -60,40 +65,6 @@ namespace Core.Infra.View
             }
         }
 
-        // Note: a subclass that declares its own OnDestroy hides this one. Override ManagedDispose instead.
-        private void OnDestroy()
-        {
-            Dispose();
-        }
-
-        protected virtual void ManagedAwake()
-        {
-            
-        }
-
-        protected virtual void ManagedStart()
-        {
-            
-        }
-
-        protected virtual void ManagedDispose()
-        {
-        }
-
-        private void Update()
-        {
-            if (!Initialized || _disposed)
-            {
-                return;
-            }
-            
-            ManagedUpdate();
-        }
-
-        protected virtual void ManagedUpdate()
-        {
-        }
-
         public void Destroy<TG>(IInstance<TG> instance) where TG : Object
         {
             _assetService.Destroy(instance);
@@ -102,6 +73,27 @@ namespace Core.Infra.View
         public GameObject Instantiate<TG>(IInstance<TG> instance) where TG : Object
         {
             return _assetService.Instantiate(instance);
+        }
+
+        protected void InitChild(ViewBase<T> view)
+        {
+            view.Init(Module, _assetService);
+        }
+
+        protected virtual void ManagedAwake()
+        {
+        }
+
+        protected virtual void ManagedStart()
+        {
+        }
+
+        protected virtual void ManagedDispose()
+        {
+        }
+
+        protected virtual void ManagedUpdate()
+        {
         }
     }
 }

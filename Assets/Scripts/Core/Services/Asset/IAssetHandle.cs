@@ -12,6 +12,6 @@ namespace Core.Services.Asset
         void RemoveInstance();
         void Release();
         
-        Object Asset { get; } // TODO : see if can strongly type it
+        Object Asset { get; }
     }
 }

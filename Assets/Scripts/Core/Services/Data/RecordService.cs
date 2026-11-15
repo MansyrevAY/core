@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Core.Infra.Logging;
 using Core.Services.Asset;
 using Cysharp.Threading.Tasks;
@@ -10,7 +9,7 @@ namespace Core.Services.Data
 {
     public class RecordService : IRecordService
     {
-        private const string RecordsStorageName = "RecordsStorage";
+        private const string RECORDS_STORAGE_NAME = "RecordsStorage";
 
         private readonly Dictionary<Type, BaseRecord> _records = new();
 
@@ -36,8 +35,17 @@ namespace Core.Services.Data
             return LoadRecords();
         }
 
-        // Records live in the game's assemblies, not in Core, so scan Core itself plus every
-        // loaded assembly that references it instead of relying on a hardcoded assembly name.
+        public T GetRecord<T>() where T : BaseRecord
+        {
+            if (_records.TryGetValue(typeof(T), out var record))
+            {
+                return record as T;
+            }
+
+            Log.Error($"Could not find record of type {typeof(T).Name}, returning null.");
+            return null;
+        }
+
         private static IEnumerable<Type> FindRecordTypes()
         {
             var baseType = typeof(BaseRecord);
@@ -59,18 +67,7 @@ namespace Core.Services.Data
                     continue;
                 }
 
-                Type[] types;
-
-                try
-                {
-                    types = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    types = e.Types.Where(t => t != null).ToArray();
-                }
-
-                foreach (var type in types)
+                foreach (var type in assembly.GetTypes())
                 {
                     if (baseType.IsAssignableFrom(type) && !type.IsAbstract && type.GetConstructor(Type.EmptyTypes) != null)
                     {
@@ -80,14 +77,13 @@ namespace Core.Services.Data
             }
         }
 
-        // Authored values from the storage asset override the code defaults created in CreateAll.
         private async UniTask LoadRecords()
         {
-            var storage = await _assetService.Load<RecordStorage>(RecordsStorageName);
+            var storage = await _assetService.Load<RecordStorage>(RECORDS_STORAGE_NAME);
 
             if (storage == null || storage.Records == null)
             {
-                Log.Warning($"Record storage '{RecordsStorageName}' not found, using default records");
+                Log.Warning($"Record storage '{RECORDS_STORAGE_NAME}' not found, using default records");
                 return;
             }
 
@@ -95,7 +91,7 @@ namespace Core.Services.Data
             {
                 if (recordObject == null || recordObject.Record == null)
                 {
-                    Log.Warning($"Empty record entry in '{RecordsStorageName}', ignoring");
+                    Log.Warning($"Empty record entry in '{RECORDS_STORAGE_NAME}', ignoring");
                     continue;
                 }
 
@@ -109,17 +105,6 @@ namespace Core.Services.Data
 
                 _records[type] = recordObject.Record;
             }
-        }
-
-        public T GetRecord<T>() where T : BaseRecord
-        {
-            if (_records.TryGetValue(typeof(T), out var record))
-            {
-                return record as T;
-            }
-
-            Log.Error($"Could not find record of type {typeof(T).Name}, returning null.");
-            return null;
         }
     }
 }
