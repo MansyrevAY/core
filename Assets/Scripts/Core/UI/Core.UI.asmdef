@@ -1,0 +1,15 @@
+{
+    "name": "Core.UI",
+    "rootNamespace": "Core.UI",
+    "references": [
+        "Core.Input",
+        "UniTask",
+        "R3.Unity",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "Unity.ugui",
+        "Core.Lifetime"
+    ],
+    "autoReferenced": true,
+    "noEngineReferences": false
+}

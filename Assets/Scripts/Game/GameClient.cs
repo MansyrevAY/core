@@ -1,5 +1,5 @@
 using Core.Infra.Bootstrap;
-using Core.Infra.Logging;
+using Game.Demo;
 
 namespace Game
 {
@@ -8,13 +8,7 @@ namespace Game
         protected override void CreateModules()
         {
             base.CreateModules();
-        }
-
-        protected override void StartGame()
-        {
-            base.StartGame();
-
-            Log.Info("Game started");
+            AddModule(new CoopDemoModule());
         }
     }
 }

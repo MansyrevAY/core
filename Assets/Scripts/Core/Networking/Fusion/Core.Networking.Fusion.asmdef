@@ -1,0 +1,22 @@
+{
+    "name": "Core.Networking.Fusion",
+    "rootNamespace": "Core.Networking.Fusion",
+    "references": [
+        "Core.Networking.Core",
+        "Fusion.Unity",
+        "UniTask",
+        "R3.Unity",
+        "Core.Resources",
+        "Core.Lifetime",
+        "Photon.Realtime"
+    ],
+    "autoReferenced": true,
+    "noEngineReferences": false,
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "1.0",
+            "define": "CORE_ADDRESSABLES"
+        }
+    ]
+}

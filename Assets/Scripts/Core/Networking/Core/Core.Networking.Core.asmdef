@@ -1,0 +1,7 @@
+{
+    "name": "Core.Networking.Core",
+    "rootNamespace": "Core.Networking.Core",
+    "references": [],
+    "autoReferenced": true,
+    "noEngineReferences": true
+}

@@ -3,7 +3,20 @@
     "rootNamespace": "Game",
     "references": [
         "Core",
-        "UniTask"
+        "UniTask",
+        "Core.Resources",
+        "Core.Lifetime",
+        "Core.Input",
+        "Core.UI",
+        "Core.Networking.Core",
+        "Core.Networking.Fusion",
+        "Core.Networking.Players",
+        "Fusion.Unity",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "Unity.ugui",
+        "R3.Unity",
+        "Photon.Realtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,0 +1,16 @@
+{
+    "name": "Game.Editor",
+    "references": [
+        "Game",
+        "Core.Networking.Players",
+        "Fusion.Unity",
+        "Fusion.Unity.Editor",
+        "Unity.TextMeshPro",
+        "Unity.ugui",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Photon.Realtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

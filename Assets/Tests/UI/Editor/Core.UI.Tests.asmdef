@@ -1,0 +1,13 @@
+{
+    "name": "Core.UI.Tests",
+    "references": [
+        "Core.UI",
+        "Unity.ugui"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

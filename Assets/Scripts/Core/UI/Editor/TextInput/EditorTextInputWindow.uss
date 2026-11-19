@@ -1,0 +1,26 @@
+.text-input-dialog {
+    flex-grow: 1;
+    padding: 16px;
+}
+.dialog-title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+.dialog-help {
+    white-space: normal;
+    margin-bottom: 10px;
+}
+.draft-field {
+    flex-grow: 1;
+    margin-bottom: 12px;
+}
+.dialog-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+.dialog-actions Button {
+    min-width: 100px;
+    min-height: 28px;
+    margin-left: 8px;
+}

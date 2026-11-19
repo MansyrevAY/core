@@ -1,6 +1,6 @@
 # Core
 
-A Unity project (`6000.2.6f2`) with shared infrastructure and services (`Assets/Scripts/Core`) and a ready `Game` assembly (`Assets/Scripts/Game`). The scene `Assets/Scenes/ClientScene.unity` starts the game through `GameClient`. A user of Core adds game logic to the Game assembly. The code is C#. It uses UniTask and Addressables.
+A Unity project (`6000.7.0b7`) with shared infrastructure and services (`Assets/Scripts/Core`) and a ready `Game` assembly (`Assets/Scripts/Game`). The scene `Assets/Demo/Scenes/Bootstrap.unity` starts the coop demo through `GameClient`. A user of Core adds game logic to the Game assembly. The code is C#. It uses UniTask and Addressables.
 
 ## Documentation
 
@@ -47,3 +47,9 @@ The rules for the docs are in [docs/conventions.md](docs/conventions.md). Read t
 - Write all documents in ASD-STE100 Simplified Technical English.
 - When you add, rename or remove a source folder or a responsibility page, change the tables that list them. The [maintenance rules](docs/conventions.md#maintenance) name the tables.
 - Do not describe plans in `docs/architecture`. Describe only what exists in the code.
+
+## Coop demo
+
+Read [Run the demo](docs/coop-demo.md) and [Coop sessions](docs/architecture/coop-sessions.md). Core modules must not reference Game types.
+Use [Reuse the modules](docs/reuse-coop.md) for extraction boundaries and composition contracts.
+Use [Testing](docs/testing.md) for test commands, online requirements, and the latest local results.
