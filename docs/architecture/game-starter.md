@@ -9,19 +9,21 @@ This responsibility gives a project that is ready to run. A user of Core opens t
 | Part | What it does | Page |
 |------|--------------|------|
 | `Game` assembly and `GameClient` | The assembly for the game code. `GameClient` is the subclass of `Client` that starts the game. | [Game](game/README.md) |
-| `ClientScene` | The scene that starts the game. It holds a Main Camera and a GameObject with the `GameClient` component. It is the only scene in the build settings. | This page |
+| `Bootstrap` | The first build scene. It holds the camera and `GameClient`. | This page |
+| `World` | The second build scene. It holds the floor, light, and player session director. | [Coop sessions](coop-sessions.md) |
 | `RecordsStorage` asset | An empty `RecordStorage` in `Assets/Resources`. `Client` loads it at boot. | [Records](records.md) |
 
-Files: `Assets/Scenes/ClientScene.unity`, `Assets/Resources/RecordsStorage.asset`, `Assets/Scripts/Game`.
+Files: `Assets/Demo/Scenes/Bootstrap.unity`, `Assets/Demo/Scenes/World.unity`, `Assets/Resources/RecordsStorage.asset`, `Assets/Scripts/Game`.
 
 ## How it works
 
-1. The player or the editor runs `ClientScene`.
+1. The player or the Editor runs `Bootstrap`.
 2. Unity starts the `GameClient` component.
 3. `Client` runs the boot sequence. Refer to [Bootstrap and lifecycle](bootstrap-and-lifecycle.md).
 4. `Client` loads `RecordsStorage` during `InitializeServices`.
-5. `GameClient.CreateModules` runs. It has no modules at the start.
-6. `GameClient.StartGame` runs. It writes the message "Game started" to the log.
+5. `GameClient.CreateModules` adds `CoopDemoModule`.
+6. `ModuleScope.Start` starts the demo module. The module creates the services and opens the menu.
+7. `Client.StartGame` runs its empty base implementation.
 
 ## How to add game logic
 
@@ -40,10 +42,15 @@ Files: `Assets/Scenes/ClientScene.unity`, `Assets/Resources/RecordsStorage.asset
 
 ## Notes
 
-- `Game.asmdef` references `Core` and `UniTask` by name.
+- `Game.asmdef` references Core, the coop assemblies, and their external Unity assemblies.
+- `Assets/Scenes/ClientScene.unity` remains from the original starter. It is not in the build settings.
 - `Assets/Scenes/SampleScene.unity` is the old sample scene. It is not in the build settings.
 
 ## Related responsibilities
 
 - [Bootstrap and lifecycle](bootstrap-and-lifecycle.md): the boot sequence that `GameClient` extends.
 - [Modules and views](modules-and-views.md): the structure of a module.
+
+## Coop example
+
+The default Game module is the [coop demo](game/demo.md). Refer to [Run the demo](../coop-demo.md) and [Reuse the modules](../reuse-coop.md).

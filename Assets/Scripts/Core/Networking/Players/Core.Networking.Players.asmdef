@@ -1,0 +1,13 @@
+{
+    "name": "Core.Networking.Players",
+    "rootNamespace": "Core.Networking.Players",
+    "references": [
+        "Core.Networking.Core",
+        "Core.Networking.Fusion",
+        "Core.Resources",
+        "Core.Lifetime",
+        "Fusion.Unity",
+        "R3.Unity",
+        "UniTask"
+    ]
+}

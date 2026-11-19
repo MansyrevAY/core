@@ -1,0 +1,37 @@
+{
+    "name": "Core.Integration.Tests",
+    "references": [
+        "Core.Networking.Fusion",
+        "Core.Networking.Core",
+        "Core.Networking.Players",
+        "Core.Resources",
+        "Core.Lifetime",
+        "Core.Input",
+        "Core.UI",
+        "UniTask",
+        "R3.Unity",
+        "Fusion.Unity",
+        "Photon.Realtime",
+        "Unity.ugui",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "Game"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Fusion.Runtime.dll",
+        "Fusion.Realtime.dll",
+        "Fusion.Common.dll",
+        "Fusion.Sockets.dll",
+        "R3.dll",
+        "Microsoft.Bcl.TimeProvider.dll",
+        "Microsoft.Bcl.AsyncInterfaces.dll"
+    ]
+}

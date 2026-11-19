@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="EditorTextInputWindow.uss" />
+    <ui:VisualElement class="text-input-dialog">
+        <ui:Label text="Text input · Editor" class="dialog-title" />
+        <ui:Label text="Type using your keyboard or IME. This dialog tests the platform keyboard adapter." class="dialog-help" />
+        <ui:TextField name="draft" class="draft-field" />
+        <ui:Label text="A / Enter: confirm · B / Escape: cancel · Ctrl+Enter: confirm multiline" class="dialog-help" />
+        <ui:VisualElement class="dialog-actions">
+            <ui:Button name="cancel" text="Cancel" />
+            <ui:Button name="confirm" text="Confirm" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

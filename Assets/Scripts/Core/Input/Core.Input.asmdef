@@ -1,0 +1,9 @@
+{
+    "name": "Core.Input",
+    "rootNamespace": "Core.Input",
+    "references": [
+        "Unity.InputSystem"
+    ],
+    "autoReferenced": true,
+    "noEngineReferences": false
+}
